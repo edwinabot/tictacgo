@@ -17,9 +17,8 @@ var rays [][]int = [][]int{
 
 func isTicTacToe(grid []int) bool {
 	for i := 0; i < len(rays); i++ {
-		ray := rays[i]
-		var x, y, z = ray[0], ray[1], ray[2]
-		if (grid[x] == grid[y] && grid[y] == grid[z]) && ((grid[x] == 1) || (grid[x] == -1)) {
+		var x, y, z = rays[i][0], rays[i][1], rays[i][2]
+		if (grid[x] == grid[y] && grid[y] == grid[z]) && (grid[x] != 0) {
 			return true
 		}
 	}
