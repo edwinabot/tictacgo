@@ -2,34 +2,45 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 func main() {
 	// Create a tic-tac-toe board.
 	var grid []int = []int{0, 0, 0, 0, 0, 0, 0, 0, 0}
-	var turn = -1
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	turn := 1
+	firstMove := r.Intn(9)
+	grid[firstMove] = 1
+	printGrid(grid)
 	for !isTicTacToe(grid) {
 		turn *= -1
-		if turn == 1 {
-			printGrid(grid)
-			var pos = scanMarkPosition()
-			placeMark(grid, pos, turn)
-		} else {
-			var bestMove int = -1
-			var bestMoveScore int
-			for i := 0; i < 9; i++ {
-				if grid[i] != 0 {
-					grid[i] = -1
-					score := minimax(grid, 6, false)
-					grid[i] = 0
-					if bestMove == -1 || bestMoveScore > score {
-						bestMove = i
-						bestMoveScore = score
+		/*
+			if turn == 1 {
+				printGrid(grid)
+				var pos = scanMarkPosition()
+				placeMark(grid, pos, turn)
+			} else {
+				var bestMove int = -1
+				var bestMoveScore int
+				for i := 0; i < 9; i++ {
+					if grid[i] != 0 {
+						grid[i] = -1
+						score := minimax(grid, 6, false)
+						grid[i] = 0
+						if bestMove == -1 || bestMoveScore > score {
+							bestMove = i
+							bestMoveScore = score
+						}
 					}
 				}
+				grid[bestMove] = -1
 			}
-			grid[bestMove] = -1
-		}
+		*/
+		move := aiPlay(grid, 3, turn == 1)
+		grid[move] = turn
+		printGrid(grid)
 	}
 	fmt.Printf("TicTacGo!! winner is: %v\n", toMarkString(turn))
 }
@@ -111,9 +122,9 @@ func evaluate(grid []int, depth int, isMaximizing bool) int {
 		score = 0
 	}
 	if isMaximizing {
-		score -= depth
-	} else {
 		score += depth
+	} else {
+		score -= depth
 	}
 	return score
 }
@@ -125,13 +136,14 @@ func minimize(grid []int, depth int) int {
 
 	bestScore := 1000000
 	for i := 0; i < 9; i++ {
-		if grid[i] == 0 {
-			grid[i] = -1
-			score := maximize(grid, depth-1)
-			grid[i] = 0
-			if score < bestScore {
-				bestScore = score
-			}
+		if grid[i] != 0 {
+			continue
+		}
+		grid[i] = -1
+		score := maximize(grid, depth-1)
+		grid[i] = 0
+		if score < bestScore {
+			bestScore = score
 		}
 	}
 	return bestScore
@@ -145,13 +157,15 @@ func maximize(grid []int, depth int) int {
 	bestScore := -1000000
 	for i := 0; i < 9; i++ {
 		if grid[i] == 0 {
-			grid[i] = 1
-			score := minimize(grid, depth-1)
-			grid[i] = 0
-			if score > bestScore {
-				bestScore = score
-			}
+			continue
 		}
+		grid[i] = 1
+		score := minimize(grid, depth-1)
+		grid[i] = 0
+		if score > bestScore {
+			bestScore = score
+		}
+
 	}
 	return bestScore
 }
@@ -161,4 +175,26 @@ func minimax(grid []int, maxdepth int, isMaximizing bool) int {
 		return maximize(grid, maxdepth)
 	}
 	return minimize(grid, maxdepth)
+}
+
+func aiPlay(grid []int, searchDepth int, isMaximizer bool) int {
+	bestMove := -1
+	var bestMoveScore int
+	for i := 0; i < 9; i++ {
+		if grid[i] != 0 {
+			continue
+		}
+		if isMaximizer {
+			grid[i] = 1
+		} else {
+			grid[i] = -1
+		}
+		score := minimax(grid, searchDepth, isMaximizer)
+		grid[i] = 0
+		if bestMove == -1 || (isMaximizer && bestMoveScore > score) || (!isMaximizer && bestMoveScore < score) {
+			bestMove = i
+			bestMoveScore = score
+		}
+	}
+	return bestMove
 }
