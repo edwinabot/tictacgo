@@ -2,25 +2,29 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 )
 
 func main() {
 	// Create a tic-tac-toe board.
 	var grid []int = []int{0, 0, 0, 0, 0, 0, 0, 0, 0}
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	turn := 1
-	firstMove := r.Intn(9)
-	grid[firstMove] = 1
+	turn := -1
 	printGrid(grid)
-	for !isTicTacToe(grid) {
+	for !isTicTacToe(grid) && !isDraw(grid) {
 		turn *= -1
-		move := aiPlay(grid, 20, turn == 1)
-		grid[move] = turn
+		if turn == 1 {
+			humanPlay(grid, turn)
+		} else {
+			move := aiPlay(grid, 20, false)
+			grid[move] = turn
+		}
 		printGrid(grid)
 	}
-	fmt.Printf("TicTacGo!! winner is: %v\n", toMarkString(turn))
+	if isTicTacToe(grid) {
+		fmt.Printf("TicTacGo!! winner is: %v\n", toMarkString(turn))
+	} else {
+		fmt.Printf("Its a draw...\n")
+	}
+
 }
 
 var rays [][]int = [][]int{
@@ -62,7 +66,7 @@ func placeMark(grid []int, position int, mark int) {
 
 func scanMarkPosition() int {
 	var pos int
-	fmt.Print("Enter text: ")
+	fmt.Print("Enter position: ")
 	fmt.Scan(&pos)
 	return pos - 1
 }
