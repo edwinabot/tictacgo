@@ -16,29 +16,7 @@ func main() {
 	printGrid(grid)
 	for !isTicTacToe(grid) {
 		turn *= -1
-		/*
-			if turn == 1 {
-				printGrid(grid)
-				var pos = scanMarkPosition()
-				placeMark(grid, pos, turn)
-			} else {
-				var bestMove int = -1
-				var bestMoveScore int
-				for i := 0; i < 9; i++ {
-					if grid[i] != 0 {
-						grid[i] = -1
-						score := minimax(grid, 6, false)
-						grid[i] = 0
-						if bestMove == -1 || bestMoveScore > score {
-							bestMove = i
-							bestMoveScore = score
-						}
-					}
-				}
-				grid[bestMove] = -1
-			}
-		*/
-		move := aiPlay(grid, 3, turn == 1)
+		move := aiPlay(grid, 20, turn == 1)
 		grid[move] = turn
 		printGrid(grid)
 	}
@@ -107,6 +85,7 @@ func printGrid(grid []int) {
 	fmt.Printf(st, toMarkString(grid[3]), toMarkString(grid[4]), toMarkString(grid[5]))
 	fmt.Println(dv)
 	fmt.Printf(st, toMarkString(grid[0]), toMarkString(grid[1]), toMarkString(grid[2]))
+	fmt.Println("\n")
 }
 
 func evaluate(grid []int, depth int, isMaximizing bool) int {
@@ -156,7 +135,7 @@ func maximize(grid []int, depth int) int {
 
 	bestScore := -1000000
 	for i := 0; i < 9; i++ {
-		if grid[i] == 0 {
+		if grid[i] != 0 {
 			continue
 		}
 		grid[i] = 1
@@ -189,7 +168,7 @@ func aiPlay(grid []int, searchDepth int, isMaximizer bool) int {
 		} else {
 			grid[i] = -1
 		}
-		score := minimax(grid, searchDepth, isMaximizer)
+		score := minimax(grid, searchDepth, !isMaximizer)
 		grid[i] = 0
 		if bestMove == -1 || (isMaximizer && bestMoveScore > score) || (!isMaximizer && bestMoveScore < score) {
 			bestMove = i
@@ -197,4 +176,9 @@ func aiPlay(grid []int, searchDepth int, isMaximizer bool) int {
 		}
 	}
 	return bestMove
+}
+
+func humanPlay(grid []int, turn int) {
+	var pos = scanMarkPosition()
+	placeMark(grid, pos, turn)
 }
